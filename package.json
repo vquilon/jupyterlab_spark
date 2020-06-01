@@ -1,27 +1,28 @@
 {
   "name": "jupyterlab_spark",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Show Spark Application UI in a JupyterLab panel",
   "keywords": [
     "jupyter",
     "jupyterlab",
     "jupyterlab-extension"
   ],
-  "homepage": "https://github.com/manuzhang/jupyterlab_spark",
+  "homepage": "https://github.com/vquilon/jupyterlab_spark",
   "bugs": {
-    "url": "https://github.com/manuzhang/jupyterlab_spark/issues"
+    "url": "https://github.com/vquilon/jupyterlab_spark/issues"
   },
   "license": "apache-2.0",
-  "author": "manuzhang",
+  "author": "vquilon",
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "schema/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/manuzhang/jupyterlab_spark.git"
+    "url": "https://github.com/vquilon/jupyterlab_spark.git"
   },
   "scripts": {
     "build": "tsc",
@@ -32,6 +33,7 @@
   "dependencies": {
     "@jupyterlab/application": "^2.0.0",
     "@jupyterlab/mainmenu": "^2.0.0",
+    "@jupyterlab/settingregistry": "^2.0.0",
     "@lumino/widgets": "^1.8.0"
   },
   "devDependencies": {

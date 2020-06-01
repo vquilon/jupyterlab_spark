@@ -3,17 +3,17 @@ import {
 } from '@jupyterlab/application';
 
 import {IMainMenu} from '@jupyterlab/mainmenu'
-
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {Menu} from '@lumino/widgets'
 
 import '../style/index.css';
 import { showDialog, Dialog, MainAreaWidget, IFrame } from '@jupyterlab/apputils';
-
 import { Widget } from '@lumino/widgets';
+
+const PLUGIN_NAME = 'jupyterlab-spark';
 
 namespace CommandIDs {
   export const input = "ui:input";
-  
   export const open = "ui:open";
 }
 
@@ -23,21 +23,29 @@ namespace CommandIDs {
 const extension: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab_spark',
   autoStart: true,
-  requires: [IMainMenu],
+  requires: [IMainMenu, ISettingRegistry],
   activate: activate_custom_menu
 };
 
 export default extension;
 
-export function activate_custom_menu(app: JupyterFrontEnd, mainMenu: IMainMenu): Promise<void> {
+export function activate_custom_menu(app: JupyterFrontEnd, mainMenu: IMainMenu, settingRegistry: ISettingRegistry): Promise<void> {
   console.log('JupyterLab extension jupyterlab_spark is activated!');
 
   let namespace = 'spark-ui'
   let counter = 0;
+  var _settings = {port: '4040'};
+  var _settingRegistry = settingRegistry;
   
+
+  function updateSettings(settings: ISettingRegistry.ISettings) {
+    _settings.port = settings.get('port').composite;
+  }  
+
   function newWidget(url: string, text: string): MainAreaWidget {
     let content = new IFrame();
     content.url = url;
+    content.sandbox = ["allow-same-origin", "allow-scripts", "allow-popups", "allow-forms"];
     content.title.label = text;
     content.id = `${namespace}-${++counter}`;
     let widget = new MainAreaWidget({ content });
@@ -65,14 +73,25 @@ export function activate_custom_menu(app: JupyterFrontEnd, mainMenu: IMainMenu):
 
   app.commands.addCommand(CommandIDs.open, {
     execute: args => {
-      const url = 'http://localhost:8080/app/?appId=' + args['appId'];
-      let widget =  newWidget(url, 'Spark App UI');
-      if (!widget.isAttached) {
-        // Attach the widget to the main work area if it's not there
-        app.shell.add(widget, "main");
-      }
-      // Activate the widget
-      app.shell.activateById(widget.id);
+      _settingRegistry.load(`${PLUGIN_NAME}:settings`).then((settings: ISettingRegistry.ISettings) => {
+          updateSettings(settings);
+          settings.changed.connect(updateSettings.bind(this));
+
+          const url = `http://localhost:${_settings.port}/app/?appId=` + args['appId'];
+          let widget = newWidget(url, 'Spark App UI');
+          if (!widget.isAttached) {
+              // Attach the widget to the main work area if it's not there
+              app.shell.add(widget, "main");
+          }
+          // Activate the widget
+          app.shell.activateById(widget.id);
+        },
+        (err: Error) => {
+          console.error(
+            `Could not load settings, so did not active ${PLUGIN_NAME}: ${err}`
+          );
+        }
+      );
     }
   })
 
@@ -121,7 +140,7 @@ namespace Private {
 
     let input = document.createElement('input');
     input.value = '';
-    input.placeholder = 'app-xxx';
+    input.placeholder = 'app-xxx, local-xxx';
 
     body.appendChild(existingLabel);
     body.appendChild(input);

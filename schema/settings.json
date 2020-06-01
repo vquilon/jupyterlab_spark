@@ -1,0 +1,13 @@
+{
+  "title": "Spark UI Tab",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "port": {
+      "type": "string",
+      "title": "Port",
+      "description": "Puerto de Spark UI",
+      "default": 4040
+    }
+  }
+}
